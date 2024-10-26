@@ -1,9 +1,9 @@
 {
-	"node": "n8n-nodes-base.keyExtractor",
+	"node": "n8n-nodes-base.splitString",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
 	"categories": ["Core Nodes"],
 	"subcategories": {
-		"Core Nodes": ["Flow", "Data Transformation"]
+		"Core Nodes": ["Data Transformation"]
 	}
 }
