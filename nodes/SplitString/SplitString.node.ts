@@ -37,48 +37,57 @@ export class SplitString implements INodeType {
 				description: 'Separator which should be used to split a string',
 			},
 			{
-				displayName: 'Mapping',
-				name: 'mappings',
-				placeholder: 'Add Mapping',
-				type: 'fixedCollection',
-				description: 'Define the mapping for each splitted value',
-				typeOptions: {
-					multipleValues: true,
-					sortable: true,
-				},
+				displayName: 'Options',
+				name: 'options',
+				type: 'collection',
+				placeholder: 'Add option',
 				default: {},
 				options: [
 					{
-						name: 'values',
 						displayName: 'Mapping',
-						values: [
+						name: 'mappings',
+						placeholder: 'Add Mapping',
+						type: 'fixedCollection',
+						description: 'Define the mapping for each splitted value',
+						typeOptions: {
+							multipleValues: true,
+							sortable: true,
+						},
+						default: {},
+						options: [
 							{
-								displayName: 'Name',
-								name: 'name',
-								type: 'string',
-								default: '',
-								placeholder: 'e.g. fieldName',
-								description: 'Name of the field to set the value of',
-							},
-							{
-								displayName: 'Index',
-								name: 'index',
-								type: 'string',
-								default: '0',
-								validateType: 'number',
-								description: 'Index of the array to set the value of',
+								name: 'values',
+								displayName: 'Mapping',
+								values: [
+									{
+										displayName: 'Name',
+										name: 'name',
+										type: 'string',
+										default: '',
+										placeholder: 'e.g. fieldName',
+										description: 'Name of the field to set the value of',
+									},
+									{
+										displayName: 'Index',
+										name: 'index',
+										type: 'string',
+										default: '0',
+										validateType: 'number',
+										description: 'Index of the array to set the value of',
+									},
+								],
 							},
 						],
 					},
+					{
+						displayName: 'Input Fields to Include',
+						name: 'inputFields',
+						type: 'string',
+						default: '',
+						description: 'Comma-separated List of Fields to include in Result',
+						placeholder: 'e.g. field1,field2',
+					},
 				],
-			},
-			{
-				displayName: 'Input Fields to Include',
-				name: 'inputFields',
-				type: 'string',
-				default: '',
-				description: 'Comma-separated List of Fields to include in Result',
-				placeholder: 'e.g. field1,field2',
 			},
 		],
 	};
@@ -86,45 +95,68 @@ export class SplitString implements INodeType {
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
 
-		const value = this.getNodeParameter('value', 0) as string;
 		const separator = this.getNodeParameter('separator', 0) as string;
-		const inputFields = this.getNodeParameter('inputFields', 0) as string;
-		const fields = this.getNodeParameter('mappings.values', 0) as MappingField[];
+		const options = this.getNodeParameter('options', 0) as {
+			mappings: {
+				values: MappingField[];
+			};
+			inputFields: string;
+		};
+
+		const inputFields: any[] = [];
+		if (options?.inputFields?.length > 0) {
+			inputFields.push(...options.inputFields.split(','));
+		}
+
+		let mappings: MappingField[] = [];
+		if (options?.mappings?.values?.length > 0) {
+			mappings = options.mappings.values;
+		}
 
 		let result: INodeExecutionData[] = [];
 
-		const validInputFields: any[] = [];
-		if (inputFields) {
-			validInputFields.push(...inputFields.split(','));
-		}
+		for (let i = 0; i < items.length; i++) {
+			const item = items[i];
 
-		if (value) {
-			if (items) {
-				items.forEach((item) => {
-					const resultItem: any = {};
-
-					const parts = value.split(separator);
-					if (parts.length > 0) {
-						for (const entry of fields) {
-							const value = parts[entry.index];
-							if (value) {
-								resultItem[entry.name] = value;
-							}
-						}
+			// Prepare input fields for output
+			const inputs: any = {};
+			if (inputFields?.length > 0) {
+				inputFields.forEach((field) => {
+					const inputValue = item.json[field];
+					if (inputValue) {
+						inputs[field] = inputValue;
 					}
-
-					validInputFields.forEach((field) => {
-						const value = item.json[field];
-						if (value) {
-							resultItem[field] = value;
-						}
-					});
-
-					result.push({ json: resultItem });
 				});
 			}
-		} else {
-			result = items;
+
+			const valueToSplit = this.getNodeParameter('value', i) as string;
+			const parts = valueToSplit?.split(separator);
+			if (parts.length > 0) {
+				if (mappings?.length > 0) {
+					const resultItem: any = {};
+					for (const mapping of mappings) {
+						const value = parts[mapping.index];
+						if (value) {
+							resultItem[mapping.name] = value;
+						}
+					}
+					result.push({
+						json: {
+							...resultItem,
+							...inputs,
+						},
+					});
+				} else {
+					parts.forEach((part) => {
+						result.push({
+							json: {
+								item: part,
+								...inputs,
+							},
+						});
+					});
+				}
+			}
 		}
 
 		return [result];

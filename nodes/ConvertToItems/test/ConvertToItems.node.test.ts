@@ -109,4 +109,58 @@ describe('Topic', () => {
 		});
 	});
 
+	test('should parse a markdown table, filter for room kitchen and convert result array', async () => {
+		executeFunctions.getNodeParameter.calledWith('search', 0).mockReturnValue('kitchen');
+		executeFunctions.getNodeParameter.calledWith('searchBy', 0).mockReturnValue('room');
+		executeFunctions.getNodeParameter
+			.calledWith('include', 0)
+			.mockReturnValue('room,boot,shutdown');
+		executeFunctions.getNodeParameter.calledWith('options', 0).mockReturnValue({
+			includeRowsWithEmptyFields: true,
+			convertToDictionary: true
+		});
+
+		const items: INodeExecutionData[][] = await new ConvertToItems().execute.call(executeFunctions);
+
+		expect(items).not.toBeNull();
+		expect(items[0].length).toBe(3);
+		items[0].forEach(x =>{
+			const item = x.json as {
+				key: string,
+				value: string
+			};
+
+			expect(item).not.toBeNull();
+			expect(item.key).not.toBeUndefined();
+			expect(item.value).not.toBeUndefined();
+		});
+	});
+
+	test('should parse a markdown table, filter for room living, convert result array and remove empty entries', async () => {
+		executeFunctions.getNodeParameter.calledWith('search', 0).mockReturnValue('living');
+		executeFunctions.getNodeParameter.calledWith('searchBy', 0).mockReturnValue('room');
+		executeFunctions.getNodeParameter
+			.calledWith('include', 0)
+			.mockReturnValue('room,boot,shutdown');
+		executeFunctions.getNodeParameter.calledWith('options', 0).mockReturnValue({
+			includeRowsWithEmptyFields: false,
+			convertToDictionary: true
+		});
+
+		const items: INodeExecutionData[][] = await new ConvertToItems().execute.call(executeFunctions);
+
+		expect(items).not.toBeNull();
+		expect(items[0].length).toBe(2);
+		items[0].forEach(x =>{
+			const item = x.json as {
+				key: string,
+				value: string
+			};
+
+			expect(item).not.toBeNull();
+			expect(item.key).not.toBeUndefined();
+			expect(item.value).not.toBeUndefined();
+		});
+	});
+
 });

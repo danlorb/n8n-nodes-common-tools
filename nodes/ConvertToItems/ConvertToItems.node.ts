@@ -35,7 +35,7 @@ export class ConvertToItems implements INodeType {
 				name: 'search',
 				type: 'string',
 				default: '',
-				description: 'Value to search for in the defined search column',
+				description: 'Value to search for in the defined search column'
 			},
 			{
 				displayName: 'Search by Column',
@@ -66,6 +66,13 @@ export class ConvertToItems implements INodeType {
 						default: false,
 						description: 'Whether to include rows with empty fields in the result',
 					},
+					{
+						displayName: 'Convert Result to Dictionary',
+						name: 'convertToDictionary',
+						type: 'boolean',
+						default: false,
+						description: 'Whether to convert rows as dictionary or not',
+					},
 				],
 			},
 		],
@@ -75,11 +82,11 @@ export class ConvertToItems implements INodeType {
 		const items = this.getInputData();
 
 		const tableInput = this.getNodeParameter('table', 0) as string;
-		const search = this.getNodeParameter('search', 0) as string;
 		const searchBy = this.getNodeParameter('searchBy', 0) as string;
 		const include = this.getNodeParameter('include', 0) as string;
 		const options = this.getNodeParameter('options', 0) as {
 			includeRowsWithEmptyFields: boolean;
+			convertToDictionary: boolean;
 		};
 
 		let validFields: string[] = [];
@@ -92,7 +99,11 @@ export class ConvertToItems implements INodeType {
 
 			let result: INodeExecutionData[] = [];
 
-			items.forEach((item) => {
+			for(let i = 0; i < items.length; i++) {
+				const item = items[i];
+
+				const search = this.getNodeParameter('search',i) as string;
+
 				let itemResult: INodeExecutionData[] = [];
 				table.forEach((rows) => {
 					if (search && searchBy) {
@@ -128,6 +139,23 @@ export class ConvertToItems implements INodeType {
 				});
 				itemResult = formattedResult;
 
+				// Convert to Dictionary
+				if (options.convertToDictionary) {
+					const arrayResult: INodeExecutionData[] = [];
+					itemResult.forEach((x) => {
+						const keys = Object.keys(x.json);
+						keys.forEach((key) => {
+							arrayResult.push({
+								json: {
+									key,
+									value: x.json[key],
+								},
+							});
+						})
+					});
+					itemResult = arrayResult
+				}
+
 				// Remove rows with empty fields
 				if (!options?.includeRowsWithEmptyFields) {
 					const cleanedResult: INodeExecutionData[] = [];
@@ -150,7 +178,7 @@ export class ConvertToItems implements INodeType {
 
 				// Deploy the results
 				itemResult.forEach((x) => result.push(x));
-			});
+			}
 
 			return [result];
 		}
