@@ -22,9 +22,19 @@ switch.liv_st_1,living,,off,true
 switch.bat_st_1,bath,on,on,
 `;
 
+const csvTableWithQuotes = `
+"entity_id","room","boot","shutdown","wait"
+"switch.off_st_1","office","on","off",
+"switch.off_st_2","office","off",,
+"switch.kit_st_1","kitchen","off","off",
+"switch.liv_st_1","living",,"off","true"
+"switch.bat_st_1","bath","on","on",
+`;
+
 describe.each([
 	[ markdownTable, "should parse a markdown table"],
-	[ csvTable, "should parse a csv table"]
+	[ csvTable, "should parse a csv table"],
+	[ csvTableWithQuotes, "should parse a csv table with quotes"]
 ])('Converter', (table, prefix) => {
 	const executeFunctions = mock<IExecuteFunctions>();
 

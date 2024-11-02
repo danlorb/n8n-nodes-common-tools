@@ -202,10 +202,11 @@ export class ConvertToItems implements INodeType {
 		const columns = lines[0]
 			.split(',')
 			.filter((x) => x.trim() !== '')
-			.map((x) => x.trim());
+			.map((x) => ConvertToItems.cleanString(x));
 
 		lines
 			.slice(1)
+			.map(x => ConvertToItems.cleanString(x))
 			.map((row) => row.split(',').map((x) => x.trim()))
 			.forEach((x) => {
 				const row: any = {};
@@ -277,5 +278,14 @@ export class ConvertToItems implements INodeType {
 		}
 
 		return lines;
+	}
+
+	private static cleanString(value: string): string {
+		if (value) {
+			while (value.indexOf('"') > -1) {
+				value = value.replace('"', '');
+			}
+		}
+		return value.trim();
 	}
 }
