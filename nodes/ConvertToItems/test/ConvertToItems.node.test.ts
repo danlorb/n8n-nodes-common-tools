@@ -3,13 +3,7 @@ import { mock } from 'jest-mock-extended';
 import { IExecuteFunctions, INodeExecutionData } from 'n8n-workflow';
 import { ConvertToItems } from '../ConvertToItems.node';
 
-describe('Topic', () => {
-	const executeFunctions = mock<IExecuteFunctions>();
-
-	beforeEach(() => {
-		jest.clearAllMocks();
-
-		const table = `
+const markdownTable = `
 | entity_id       | room    | boot | shutdown | wait |
 | --------------- | ------- | ---- | -------- | ---- |
 | switch.off_st_1 | office  | on   | off      |      |
@@ -18,6 +12,24 @@ describe('Topic', () => {
 | switch.liv_st_1 | living  |      | off      | true |
 | switch.bat_st_1 | bath    | on   | on       |      |
 `;
+
+const csvTable = `
+entity_id,room,boot,shutdown,wait
+switch.off_st_1,office,on,off,
+switch.off_st_2,office,off,,
+switch.kit_st_1,kitchen,off,off,
+switch.liv_st_1,living,,off,true
+switch.bat_st_1,bath,on,on,
+`;
+
+describe.each([
+	[ markdownTable, "should parse a markdown table"],
+	[ csvTable, "should parse a csv table"]
+])('Converter', (table, prefix) => {
+	const executeFunctions = mock<IExecuteFunctions>();
+
+	beforeEach(() => {
+		jest.clearAllMocks();
 
 		executeFunctions.getInputData.mockReturnValue([
 			{ json: { message: 'off', topic: 'smarthome/room/office/switch' } },
@@ -32,14 +44,14 @@ describe('Topic', () => {
 		jest.unmock('../ConvertToItems.node');
 	});
 
-	test('should only return input data', async () => {
+	test(`${prefix} and only return input data`, async () => {
 		const items: INodeExecutionData[][] = await new ConvertToItems().execute.call(executeFunctions);
 
 		expect(items).not.toBeNull();
 		items[0].forEach(x => expect(x.json).not.toBeNull());
 	});
 
-	test('should parse a markdown table and return only field rooms', async () => {
+	test(`${prefix} and return only field rooms`, async () => {
 		executeFunctions.getNodeParameter.calledWith('include', 0).mockReturnValue('room');
 
 		const items: INodeExecutionData[][] = await new ConvertToItems().execute.call(executeFunctions);
@@ -55,10 +67,10 @@ describe('Topic', () => {
 		});
 	});
 
-	test('should parse a markdown table, filter for room office, include fields and return the result', async () => {
+	test(`${prefix}, filter for room office, include fields and return the result`, async () => {
 		executeFunctions.getNodeParameter.calledWith('search', 0).mockReturnValue('office');
 		executeFunctions.getNodeParameter.calledWith('searchBy', 0).mockReturnValue('room');
-		executeFunctions.getNodeParameter.calledWith('include', 0).mockReturnValue('entity_id,room,boot');
+		executeFunctions.getNodeParameter.calledWith('include', 0).mockReturnValue('entity_id, room,boot');
 
 		const items: INodeExecutionData[][] = await new ConvertToItems().execute.call(executeFunctions);
 		expect(items).not.toBeNull();
@@ -76,7 +88,7 @@ describe('Topic', () => {
 		});
 	});
 
-	test('should parse a markdown table, filter for room living, include fields and no result should returned', async () => {
+	test(`${prefix}, filter for room living, include fields and no result should returned`, async () => {
 		executeFunctions.getNodeParameter.calledWith('search', 0).mockReturnValue('living');
 		executeFunctions.getNodeParameter.calledWith('searchBy', 0).mockReturnValue('room');
 		executeFunctions.getNodeParameter.calledWith('include', 0).mockReturnValue('room,boot');
@@ -86,7 +98,7 @@ describe('Topic', () => {
 		expect(items[0][0]).not.toBeDefined();
 	});
 
-	test('should parse a markdown table, filter for room living, include fields and result should returned', async () => {
+	test(`${prefix}, filter for room living, include fields and result should returned`, async () => {
 		executeFunctions.getNodeParameter.calledWith('search', 0).mockReturnValue('living');
 		executeFunctions.getNodeParameter.calledWith('searchBy', 0).mockReturnValue('room');
 		executeFunctions.getNodeParameter.calledWith('include', 0).mockReturnValue('room,shutdown');
@@ -107,7 +119,7 @@ describe('Topic', () => {
 		});
 	});
 
-	test('should parse a markdown table, filter for room kitchen, include fields and convert result array', async () => {
+	test(`${prefix}, filter for room kitchen, include fields and convert result array`, async () => {
 		executeFunctions.getNodeParameter.calledWith('search', 0).mockReturnValue('kitchen');
 		executeFunctions.getNodeParameter.calledWith('searchBy', 0).mockReturnValue('room');
 		executeFunctions.getNodeParameter.calledWith('include', 0).mockReturnValue('room,boot,shutdown');
@@ -132,7 +144,7 @@ describe('Topic', () => {
 		});
 	});
 
-	test('should parse a markdown table, filter for room living, include fields, convert result array and remove empty entries', async () => {
+	test(`${prefix}, filter for room living, include fields, convert result array and remove empty entries`, async () => {
 		executeFunctions.getNodeParameter.calledWith('search', 0).mockReturnValue('living');
 		executeFunctions.getNodeParameter.calledWith('searchBy', 0).mockReturnValue('room');
 		executeFunctions.getNodeParameter.calledWith('include', 0).mockReturnValue('room,boot,shutdown');
@@ -157,7 +169,7 @@ describe('Topic', () => {
 		});
 	});
 
-	test('should parse a markdown table, filter for room living, include fields from table and input and result should returned', async () => {
+	test(`${prefix}, filter for room living, include fields from table and input and result should returned`, async () => {
 		executeFunctions.getNodeParameter.calledWith('search', 0).mockReturnValue('living');
 		executeFunctions.getNodeParameter.calledWith('searchBy', 0).mockReturnValue('room');
 		executeFunctions.getNodeParameter.calledWith('include', 0).mockReturnValue('topic,room,wait,shutdown');

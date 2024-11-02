@@ -85,7 +85,7 @@ describe('Topic', () => {
 			mappings: {
 				values: [{ name: 'room', index: 2 }],
 			},
-			inputFields: 'message,topic',
+			inputFields: 'message, topic',
 		});
 
 		const items: INodeExecutionData[][] = await new SplitString().execute.call(executeFunctions);

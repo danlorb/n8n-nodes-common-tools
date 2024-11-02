@@ -12,7 +12,7 @@ export class ConvertToItems implements INodeType {
 		icon: 'file:convertToItems.svg',
 		group: ['transform'],
 		version: 1,
-		description: 'Converts a Markdown Table to a JSON Items',
+		description: 'Converts a Table to a JSON Items',
 		defaults: {
 			name: 'Convert To Items',
 		},
@@ -20,8 +20,8 @@ export class ConvertToItems implements INodeType {
 		outputs: ['main'],
 		properties: [
 			{
-				displayName: 'Markdown Table',
-				description: 'Markdown Table as String',
+				displayName: 'Table',
+				description: 'Table as String. It could be a Markdown Table or a CSV File.',
 				name: 'table',
 				type: 'string',
 				required: true,
@@ -35,14 +35,16 @@ export class ConvertToItems implements INodeType {
 				name: 'search',
 				type: 'string',
 				default: '',
-				description: 'Value to search for in the defined search column'
+				description:
+					'Value to search for in the defined search column. If empty every value will be returned.',
 			},
 			{
 				displayName: 'Search by Column',
 				name: 'searchBy',
 				type: 'string',
 				default: '',
-				description: 'Define the column name which should be used for searching',
+				description:
+					'Define the column name which should be used for searching. If empty every value will be returned.',
 			},
 			{
 				displayName: 'Fields to Include',
@@ -81,28 +83,23 @@ export class ConvertToItems implements INodeType {
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
 
-		const tableInput = this.getNodeParameter('table', 0) as string;
-		const searchBy = this.getNodeParameter('searchBy', 0) as string;
-		const include = this.getNodeParameter('include', 0) as string;
 		const options = this.getNodeParameter('options', 0) as {
 			includeRowsWithEmptyFields: boolean;
 			convertToDictionary: boolean;
 		};
 
-		let validFields: string[] = [];
-		if (include) {
-			validFields = include.split(',');
-		}
+		let result: INodeExecutionData[] = [];
 
-		if (validFields && validFields.length > 0) {
-			const table = ConvertToItems.convertTable(tableInput);
-
-			let result: INodeExecutionData[] = [];
-
-			for(let i = 0; i < items.length; i++) {
+		if (items.length > 0) {
+			for (let i = 0; i < items.length; i++) {
 				const item = items[i];
 
-				const search = this.getNodeParameter('search',i) as string;
+				const tableInput = this.getNodeParameter('table', i) as string;
+				const table = ConvertToItems.convertTable(tableInput);
+
+				const searchBy = this.getNodeParameter('searchBy', i) as string;
+				const search = this.getNodeParameter('search', i) as string;
+				const include = this.getNodeParameter('include', i) as string;
 
 				let itemResult: INodeExecutionData[] = [];
 				table.forEach((rows) => {
@@ -126,18 +123,23 @@ export class ConvertToItems implements INodeType {
 					}
 				});
 
-				// Add only Fields which are defined by validFields
-				const formattedResult: INodeExecutionData[] = [];
-				itemResult.forEach((x) => {
-					const tempItem: any = {};
-					validFields.forEach((field) => {
-						tempItem[field] = x.json[field];
+				// Add only Fields which are defined by validFields, otherwise return all
+				let validFields: string[] = [];
+				if (include) {
+					validFields = include.split(',').map((x) => x.trim());
+
+					const formattedResult: INodeExecutionData[] = [];
+					itemResult.forEach((x) => {
+						const tempItem: any = {};
+						validFields.forEach((field) => {
+							tempItem[field] = x.json[field];
+						});
+						formattedResult.push({
+							json: tempItem,
+						});
 					});
-					formattedResult.push({
-						json: tempItem,
-					});
-				});
-				itemResult = formattedResult;
+					itemResult = formattedResult;
+				}
 
 				// Convert to Dictionary
 				if (options.convertToDictionary) {
@@ -151,9 +153,9 @@ export class ConvertToItems implements INodeType {
 									value: x.json[key],
 								},
 							});
-						})
+						});
 					});
-					itemResult = arrayResult
+					itemResult = arrayResult;
 				}
 
 				// Remove rows with empty fields
@@ -187,9 +189,49 @@ export class ConvertToItems implements INodeType {
 	}
 
 	private static convertTable(table: string): any[] {
-		const lines = table.split('\n');
+		if (table.trim().startsWith('|')) {
+			return this.convertMarkdownTable(table);
+		} else {
+			return this.convertPlainTable(table);
+		}
+	}
+	private static convertPlainTable(table: string): any[] {
+		const result: any[] = [];
+
+		const lines = ConvertToItems.trimArray(table.split('\n'));
+		const columns = lines[0]
+			.split(',')
+			.filter((x) => x.trim() !== '')
+			.map((x) => x.trim());
+
+		lines
+			.slice(1)
+			.map((row) => row.split(',').map((x) => x.trim()))
+			.forEach((x) => {
+				const row: any = {};
+				for (let i = 0; i < x.length; i++) {
+					const column = columns[i];
+					row[column] = x[i];
+				}
+
+				if (row) {
+					result.push(row);
+				}
+			});
+
+		return result;
+	}
+
+	private static convertMarkdownTable(table: string): any[] {
+		const lines = ConvertToItems.trimArray(table.split('\n'));
 		const filteredLines = lines.filter(
-			(x) => !(x.startsWith('| -') || x.startsWith('|-')) && x.trim() !== '',
+			(x) =>
+				!(
+					x.startsWith('| -') ||
+					x.startsWith('|-') ||
+					x.startsWith('| :-') ||
+					x.startsWith('|:-')
+				) && x.trim() !== '',
 		);
 
 		const result: any[] = [];
@@ -219,5 +261,21 @@ export class ConvertToItems implements INodeType {
 			});
 
 		return result;
+	}
+
+	private static trimArray(lines: string[]): string[] {
+		if (lines?.length > 0) {
+			// Remove empty lines at beginning
+			if (lines[0] === '') {
+				lines = lines.slice(1);
+			}
+
+			// Remove empty lines at end
+			if (lines[lines.length - 1] === '') {
+				lines = lines.slice(0, lines.length - 1);
+			}
+		}
+
+		return lines;
 	}
 }

@@ -105,7 +105,7 @@ export class SplitString implements INodeType {
 
 		const inputFields: any[] = [];
 		if (options?.inputFields?.length > 0) {
-			inputFields.push(...options.inputFields.split(','));
+			inputFields.push(...options.inputFields.split(',').map(x => x.trim()));
 		}
 
 		let mappings: MappingField[] = [];
