@@ -8,7 +8,7 @@ import {
 export class ConvertToItems implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Convert to Items',
-		name: 'configToItems',
+		name: 'convertToItems',
 		icon: 'file:convertToItems.svg',
 		group: ['transform'],
 		version: 1,
@@ -195,6 +195,7 @@ export class ConvertToItems implements INodeType {
 			return this.convertPlainTable(table);
 		}
 	}
+
 	private static convertPlainTable(table: string): any[] {
 		const result: any[] = [];
 
@@ -206,7 +207,7 @@ export class ConvertToItems implements INodeType {
 
 		lines
 			.slice(1)
-			.map(x => ConvertToItems.cleanString(x))
+			.map((x) => ConvertToItems.cleanString(x))
 			.map((row) => row.split(',').map((x) => x.trim()))
 			.forEach((x) => {
 				const row: any = {};

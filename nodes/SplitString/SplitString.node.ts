@@ -27,7 +27,7 @@ export class SplitString implements INodeType {
 				required: true,
 				default: '',
 				placeholder: 'e.g. hello/world',
-				description: 'Value which should used to split a string'
+				description: 'Value which should used to split a string',
 			},
 			{
 				displayName: 'Separator',
@@ -105,7 +105,7 @@ export class SplitString implements INodeType {
 
 		const inputFields: any[] = [];
 		if (options?.inputFields?.length > 0) {
-			inputFields.push(...options.inputFields.split(',').map(x => x.trim()));
+			inputFields.push(...options.inputFields.split(',').map((x) => x.trim()));
 		}
 
 		let mappings: MappingField[] = [];

@@ -32,9 +32,9 @@ const csvTableWithQuotes = `
 `;
 
 describe.each([
-	[ markdownTable, "should parse a markdown table"],
-	[ csvTable, "should parse a csv table"],
-	[ csvTableWithQuotes, "should parse a csv table with quotes"]
+	[markdownTable, 'should parse a markdown table'],
+	[csvTable, 'should parse a csv table'],
+	[csvTableWithQuotes, 'should parse a csv table with quotes'],
 ])('Converter', (table, prefix) => {
 	const executeFunctions = mock<IExecuteFunctions>();
 
@@ -58,7 +58,7 @@ describe.each([
 		const items: INodeExecutionData[][] = await new ConvertToItems().execute.call(executeFunctions);
 
 		expect(items).not.toBeNull();
-		items[0].forEach(x => expect(x.json).not.toBeNull());
+		items[0].forEach((x) => expect(x.json).not.toBeNull());
 	});
 
 	test(`${prefix} and return only field rooms`, async () => {
@@ -66,9 +66,9 @@ describe.each([
 
 		const items: INodeExecutionData[][] = await new ConvertToItems().execute.call(executeFunctions);
 		expect(items).not.toBeNull();
-		items[0].forEach(x =>{
+		items[0].forEach((x) => {
 			const item = x.json as {
-				room: string
+				room: string;
 			};
 
 			expect(item).not.toBeNull();
@@ -80,15 +80,17 @@ describe.each([
 	test(`${prefix}, filter for room office, include fields and return the result`, async () => {
 		executeFunctions.getNodeParameter.calledWith('search', 0).mockReturnValue('office');
 		executeFunctions.getNodeParameter.calledWith('searchBy', 0).mockReturnValue('room');
-		executeFunctions.getNodeParameter.calledWith('include', 0).mockReturnValue('entity_id, room,boot');
+		executeFunctions.getNodeParameter
+			.calledWith('include', 0)
+			.mockReturnValue('entity_id, room,boot');
 
 		const items: INodeExecutionData[][] = await new ConvertToItems().execute.call(executeFunctions);
 		expect(items).not.toBeNull();
-		items[0].forEach(x =>{
+		items[0].forEach((x) => {
 			const item = x.json as {
 				entity_id: string;
-				room: string,
-				boot: string
+				room: string;
+				boot: string;
 			};
 
 			expect(item).not.toBeNull();
@@ -116,10 +118,10 @@ describe.each([
 		const items: INodeExecutionData[][] = await new ConvertToItems().execute.call(executeFunctions);
 
 		expect(items).not.toBeNull();
-		items[0].forEach(x =>{
+		items[0].forEach((x) => {
 			const item = x.json as {
-				room: string,
-				shutdown: string
+				room: string;
+				shutdown: string;
 			};
 
 			expect(item).not.toBeNull();
@@ -132,20 +134,22 @@ describe.each([
 	test(`${prefix}, filter for room kitchen, include fields and convert result array`, async () => {
 		executeFunctions.getNodeParameter.calledWith('search', 0).mockReturnValue('kitchen');
 		executeFunctions.getNodeParameter.calledWith('searchBy', 0).mockReturnValue('room');
-		executeFunctions.getNodeParameter.calledWith('include', 0).mockReturnValue('room,boot,shutdown');
+		executeFunctions.getNodeParameter
+			.calledWith('include', 0)
+			.mockReturnValue('room,boot,shutdown');
 		executeFunctions.getNodeParameter.calledWith('options', 0).mockReturnValue({
 			includeRowsWithEmptyFields: true,
-			convertToDictionary: true
+			convertToDictionary: true,
 		});
 
 		const items: INodeExecutionData[][] = await new ConvertToItems().execute.call(executeFunctions);
 
 		expect(items).not.toBeNull();
 		expect(items[0].length).toBe(3);
-		items[0].forEach(x =>{
+		items[0].forEach((x) => {
 			const item = x.json as {
-				key: string,
-				value: string
+				key: string;
+				value: string;
 			};
 
 			expect(item).not.toBeNull();
@@ -157,20 +161,22 @@ describe.each([
 	test(`${prefix}, filter for room living, include fields, convert result array and remove empty entries`, async () => {
 		executeFunctions.getNodeParameter.calledWith('search', 0).mockReturnValue('living');
 		executeFunctions.getNodeParameter.calledWith('searchBy', 0).mockReturnValue('room');
-		executeFunctions.getNodeParameter.calledWith('include', 0).mockReturnValue('room,boot,shutdown');
+		executeFunctions.getNodeParameter
+			.calledWith('include', 0)
+			.mockReturnValue('room,boot,shutdown');
 		executeFunctions.getNodeParameter.calledWith('options', 0).mockReturnValue({
 			includeRowsWithEmptyFields: false,
-			convertToDictionary: true
+			convertToDictionary: true,
 		});
 
 		const items: INodeExecutionData[][] = await new ConvertToItems().execute.call(executeFunctions);
 
 		expect(items).not.toBeNull();
 		expect(items[0].length).toBe(2);
-		items[0].forEach(x =>{
+		items[0].forEach((x) => {
 			const item = x.json as {
-				key: string,
-				value: string
+				key: string;
+				value: string;
 			};
 
 			expect(item).not.toBeNull();
@@ -182,17 +188,19 @@ describe.each([
 	test(`${prefix}, filter for room living, include fields from table and input and result should returned`, async () => {
 		executeFunctions.getNodeParameter.calledWith('search', 0).mockReturnValue('living');
 		executeFunctions.getNodeParameter.calledWith('searchBy', 0).mockReturnValue('room');
-		executeFunctions.getNodeParameter.calledWith('include', 0).mockReturnValue('topic,room,wait,shutdown');
+		executeFunctions.getNodeParameter
+			.calledWith('include', 0)
+			.mockReturnValue('topic,room,wait,shutdown');
 
 		const items: INodeExecutionData[][] = await new ConvertToItems().execute.call(executeFunctions);
 
 		expect(items).not.toBeNull();
-		items[0].forEach(x =>{
+		items[0].forEach((x) => {
 			const item = x.json as {
-				topic: string,
-				room: string,
-				shutdown: string,
-				wait: string
+				topic: string;
+				room: string;
+				shutdown: string;
+				wait: string;
 			};
 
 			expect(item).not.toBeNull();
@@ -203,5 +211,4 @@ describe.each([
 			expect(item.wait).toEqual('true');
 		});
 	});
-
 });
