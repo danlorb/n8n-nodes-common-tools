@@ -3,6 +3,7 @@ import {
 	INodeExecutionData,
 	INodeType,
 	INodeTypeDescription,
+	NodeConnectionType,
 } from 'n8n-workflow';
 
 export class ConvertToItems implements INodeType {
@@ -16,8 +17,8 @@ export class ConvertToItems implements INodeType {
 		defaults: {
 			name: 'Convert To Items',
 		},
-		inputs: ['main'],
-		outputs: ['main'],
+		inputs: [NodeConnectionType.Main],
+		outputs: [NodeConnectionType.Main],
 		properties: [
 			{
 				displayName: 'Table',

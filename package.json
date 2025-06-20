@@ -1,58 +1,61 @@
 {
-  "name": "n8n-nodes-common-tools",
-  "version": "0.1.0",
-  "description": "Nodes that supports smarthome handling",
-  "keywords": [
-    "n8n-community-node-package"
-  ],
-  "license": "MIT",
-  "homepage": "",
-  "author": {
-    "name": "Roland Breitschaft",
-    "email": "roland@x-breitschaft.de"
+	"name": "n8n-nodes-common-tools",
+	"version": "0.1.0",
+	"description": "Nodes for n8n that are used by other nodes.",
+	"keywords": [
+		"n8n-community-node-package"
+	],
+	"license": "MIT",
+	"homepage": "",
+	"author": {
+		"name": "Roland Breitschaft",
+		"email": "github@danlor.simplelogin.com"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/danlorb/n8n-nodes-common-tools.git"
+	},
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://git.x-breitschaft.de/danlorb/n8n-nodes-common-tools.git"
-  },
-  "engines": {
-    "node": ">=18.10"
-  },
-  "main": "index.js",
-  "scripts": {
-    "build": "tsc && gulp build:icons",
-    "dev": "tsc --watch",
-    "format": "prettier nodes --write",
-    "lint": "eslint nodes package.json",
-    "lintfix": "eslint nodes package.json --fix",
-    "prepublishOnly": "npm run build && npm run lint -c .eslintrc.prepublish.js nodes package.json"
-  },
-  "files": [
-    "dist"
-  ],
-  "n8n": {
-    "n8nNodesApiVersion": 1,
-    "credentials": [],
-    "nodes": [
-      "dist/nodes/ConvertToItems/ConvertToItems.node.js",
-      "dist/nodes/SplitString/SplitString.node.js"
-    ]
-  },
-  "devDependencies": {
-    "@types/jest": "^30.0.0",
-    "@types/node": "24.0.3",
-    "@typescript-eslint/parser": "^8.34.1",
-    "eslint": "^9.29.0",
-    "eslint-plugin-n8n-nodes-base": "^1.16.1",
-    "gulp": "^5.0.1",
-    "jest": "^30.0.2",
-    "jest-mock-extended": "^4.0.0",
-    "n8n-workflow": "*",
-    "prettier": "^3.3.2",
-    "ts-jest": "^29.1.5",
-    "typescript": "5.8.3"
-  },
-  "peerDependencies": {
-    "n8n-workflow": "*"
-  }
+	"engines": {
+		 "node": ">=20.15"
+	},
+	"main": "index.js",
+	"scripts": {
+		"build": "npx rimraf dist && tsc && gulp build:icons",
+		"dev": "tsc --watch",
+		"format": "prettier nodes --write",
+		"lint": "eslint nodes package.json",
+		"lintfix": "eslint nodes package.json --fix",
+		"prepublishOnly": "npm run build && npm run lint -c .eslintrc.prepublish.js nodes package.json"
+	},
+	"files": [
+		"dist"
+	],
+	"n8n": {
+		"n8nNodesApiVersion": 1,
+		"credentials": [],
+		"nodes": [
+			"dist/nodes/ConvertToItems/ConvertToItems.node.js",
+			"dist/nodes/SplitString/SplitString.node.js"
+		]
+	},
+	"devDependencies": {
+		"@types/jest": "^30.0.0",
+		"@types/node": "24.0.3",
+		"@typescript-eslint/parser": "~8.32.1",
+    "eslint": "^8.57.1",
+    "eslint-plugin-n8n-nodes-base": "^1.16.3",
+		"gulp": "^5.0.1",
+		"jest": "^30.0.2",
+		"jest-mock-extended": "^4.0.0",
+		"n8n-workflow": "*",
+		"prettier": "^3.5.3",
+		"ts-jest": "^29.1.5",
+		"typescript": "5.8.3"
+	},
+	"peerDependencies": {
+		"n8n-workflow": "*"
+	}
 }
