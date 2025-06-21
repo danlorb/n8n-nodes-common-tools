@@ -1,0 +1,240 @@
+{
+  "name": "Samples",
+  "nodes": [
+    {
+      "parameters": {
+        "table": "| slug | title      | size | items               |\n| ---- | ---------- | ---- | ------------------- |\n| bath | Bath       | 7    | shower,toilete      |\n| bed  | Bedroom    | 5    | bed,window          |\n| off  | Office     | 6    | chair,desk,computer |\n| din  | Dining     | 14   | dishes,candles      |\n| kit  | Kitchen    | 9    | coffemachine        |\n| liv  | Livingroom | 16   | tv,sofa,hifi        |",
+        "search": "={{ $json.room }}",
+        "searchBy": "slug",
+        "include": "title,size,items",
+        "options": {}
+      },
+      "type": "n8n-nodes-common-tools.convertToItems",
+      "typeVersion": 1,
+      "position": [
+        60,
+        0
+      ],
+      "id": "db18e8fc-411c-4c67-9d5c-d848765b7fd4",
+      "name": "Convert To Items"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        0
+      ],
+      "id": "f047c486-fd8b-48c6-a1f5-05f5c139b66d",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "value": "={{ $json.items }}",
+        "separator": ",",
+        "options": {
+          "inputFields": "title,size"
+        }
+      },
+      "type": "n8n-nodes-common-tools.splitString",
+      "typeVersion": 1,
+      "position": [
+        480,
+        0
+      ],
+      "id": "de194657-7c51-479e-b93f-bd3c60371d68",
+      "name": "Split String"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        700,
+        0
+      ],
+      "id": "f58e818f-e8e9-4bbe-96b6-4dd94fcad270",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "target": "frontend",
+        "dateTime": false,
+        "nodeCount": false,
+        "description": "=Welcome to room '{{ $json.title }}'. This room has the size of '{{ $json.size }}' square meters.",
+        "outputData": false
+      },
+      "type": "n8n-nodes-advanced-flow.logger",
+      "typeVersion": 4,
+      "position": [
+        260,
+        0
+      ],
+      "id": "e720ae30-13b1-469f-8d22-26d8885f2ca5",
+      "name": "Welcome"
+    },
+    {
+      "parameters": {
+        "target": "frontend",
+        "dateTime": false,
+        "nodeCount": false,
+        "description": "=Have a nice day!!!",
+        "outputData": false
+      },
+      "type": "n8n-nodes-advanced-flow.logger",
+      "typeVersion": 4,
+      "position": [
+        960,
+        -60
+      ],
+      "id": "9bca47aa-1cd7-405b-8f17-5b4aa5a54759",
+      "name": "Goodbye"
+    },
+    {
+      "parameters": {
+        "target": "frontend",
+        "dateTime": false,
+        "nodeCount": false,
+        "description": "=Look at my cool item '{{ $json.item }}'",
+        "outputData": false
+      },
+      "type": "n8n-nodes-advanced-flow.logger",
+      "typeVersion": 4,
+      "position": [
+        960,
+        100
+      ],
+      "id": "63021e53-730a-4648-83f0-15af30ecace5",
+      "name": "Present item"
+    },
+    {
+      "parameters": {
+        "content": "## Demo\n\nThis workflow demostrates the usage of nodes **ConvertToItems** and **SplitString**. The Demo uses a Markdown Table as input. Also a CSV formated Table could used. To choose different values for testing change inputs on trigger node.\n\nThe Demo Workflow uses the Community Node **n8n-nodes-advanced-flow** for Log Outputs. To see the Outputs open the console of your Browsers Developer Tools.",
+        "height": 200,
+        "width": 600,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -160,
+        -240
+      ],
+      "typeVersion": 1,
+      "id": "709946c0-e531-4c9a-aa93-d06e6e182cb7",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Markdown Input\n\n| slug | title      | size | items               |\n| ---- | ---------- | ---- | ------------------- |\n| bath | Bath       | 7    | shower,toilete      |\n| bed  | Bedroom    | 5    | bed,window          |\n| off  | Office     | 6    | chair,desk,computer |\n| din  | Dining     | 14   | dishes,candles      |\n| kit  | Kitchen    | 9    | coffemachine        |\n| liv  | Livingroom | 16   | tv,sofa,hifi        |",
+        "height": 200,
+        "width": 400,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        480,
+        -240
+      ],
+      "typeVersion": 1,
+      "id": "184ac6b1-a138-4e4c-8ef7-cb2f9de08bff",
+      "name": "Sticky Note1"
+    }
+  ],
+  "pinData": {
+    "When clicking ‘Execute workflow’": [
+      {
+        "json": {
+          "room": "liv"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Convert To Items": {
+      "main": [
+        [
+          {
+            "node": "Welcome",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Convert To Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split String": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Goodbye",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Present item",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Welcome": {
+      "main": [
+        [
+          {
+            "node": "Split String",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Present item": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "53112767-1b5d-4bfd-92b5-60a9cf2e5062",
+  "meta": {
+    "instanceId": "76515d9da2b9b6d044d8fc85c2e945ed1df67df9a0d30b118c14a6c9722d35bc"
+  },
+  "id": "6p36lBvQ0Tvpo6fY",
+  "tags": []
+}

@@ -2,7 +2,7 @@
 
 # n8n-nodes-common-tools
 
-This is an n8n community node. It adds some useful nodes in your n8n workflows.
+This is an n8n community node. It adds some useful nodes in your n8n workflows. For usage import `demo-workflow.json` in root of source code. It will demostrates the generic usage of the nodes.
 
 ## ConvertToItems Node
 
